@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+echo "Installing Maven 3.9.6..."
+cd /opt
+sudo curl -O https://downloads.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz
+sudo tar -xzf apache-maven-3.9.6-bin.tar.gz
+sudo ln -sfn apache-maven-3.9.6 maven
+echo "Setting environment variables..."
+sudo tee /etc/profile.d/maven.sh > /dev/null <<EOF
+export M2_HOME=/opt/maven
+export PATH=\$M2_HOME/bin:\$PATH
+EOF
+sudo chmod +x /etc/profile.d/maven.sh
+source /etc/profile.d/maven.sh
+echo "Restarting Jenkins..."
+sudo systemctl restart jenkins
+echo "✅ Maven 3.9.6 is installed and ready for Jenkins."

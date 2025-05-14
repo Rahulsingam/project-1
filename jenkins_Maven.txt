@@ -1,0 +1,107 @@
+
+Install java 21:
+
+sudo rpm --import https://yum.corretto.aws/corretto.key
+sudo curl -Lo /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
+sudo yum install -y java-21-amazon-corretto-devel
+java -version
+
+Jenkins
+
+sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+sudo yum install jenkins -y
+sudo systemctl start jenkins
+sudo systemctl enable jenkins
+sudo systemctl status jenkins
+
+Note:sudo alternatives --config java
+
+
+Remove old maven if it exists:
+
+sudo yum remove maven -y
+
+Install maven manually:
+
+cd /opt
+sudo curl -O https://downloads.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz
+sudo tar -xvzf apache-maven-3.9.6-bin.tar.gz
+sudo ln -sfn apache-maven-3.9.6 maven
+
+
+Set environmental variables:
+
+sudo tee /etc/profile.d/maven.sh > /dev/null <<EOF
+export M2_HOME=/opt/maven
+export PATH=\$M2_HOME/bin:\$PATH
+EOF
+
+sudo chmod +x /etc/profile.d/maven.sh
+source /etc/profile.d/maven.sh
+
+mvn -vesrion
+
+Restart jenkins:
+
+systemctl start jenkins
+
+ 7. Configure Maven in Jenkins
+Go to http://<your_server_ip>:8080
+
+Navigate to: Manage Jenkins → Global Tool Configuration
+
+Under Maven:
+
+Click Add Maven
+
+Set name: Maven 3.9.6
+
+Uncheck Install Automatically
+
+Set MAVEN_HOME: /opt/maven
+
+Save configuration
+
+8. Create a Maven Job in Jenkins
+Create a new Freestyle or Pipeline job.
+
+In Build Environment, check Use Maven Version → select Maven 3.9.6.
+
+Use Maven goals like:
+
+clean install
+
+clean package
+
+If we get error with issue web.xml or pom.xml :
+
+add pulgins to pom.xml
+
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-war-plugin</artifactId>
+      <version>3.4.0</version>
+      <configuration>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
+
+
+
+add xmls for web.xml:
+
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+                             http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+    <display-name>My Web App</display-name>
+
+</web-app>
+
